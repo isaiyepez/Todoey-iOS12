@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
@@ -19,6 +19,7 @@ class CategoryViewController: UITableViewController {
         super.viewDidLoad()
         
         loadCategories()
+        tableView.rowHeight = 80.0
     }
 
     //MARK: - TableView Datasource Methods
@@ -30,10 +31,10 @@ class CategoryViewController: UITableViewController {
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
         
         cell.textLabel?.text =  categories?[indexPath.row].name ?? "No categories yet"
+        cell.delegate = self
 
         return cell
     }
@@ -100,5 +101,4 @@ class CategoryViewController: UITableViewController {
         }
         
     }
-
 }
