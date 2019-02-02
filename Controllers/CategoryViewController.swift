@@ -25,16 +25,14 @@ class CategoryViewController: SwipeTableViewController {
     //MARK: - TableView Datasource Methods
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return categories?.count ?? 1
+        return categories?.count ?? 1 //nil coalescing operator.
     }
-
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
+        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text =  categories?[indexPath.row].name ?? "No categories yet"
-        cell.delegate = self
 
         return cell
     }
@@ -59,6 +57,18 @@ class CategoryViewController: SwipeTableViewController {
        
         tableView.reloadData()
     }
+    //MARK: - Delete data from swipe
+    override func updateModel(at indexPath: IndexPath) {
+        if let category = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(category)
+                }
+            } catch {
+                print("Error deleting category, \(error)")
+            }
+        }
+    }
     
     //MARK: - Add New Categories
 
@@ -80,7 +90,6 @@ class CategoryViewController: SwipeTableViewController {
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new Category"
             textField = alertTextField
-            
         }
         
         alert.addAction(action)
