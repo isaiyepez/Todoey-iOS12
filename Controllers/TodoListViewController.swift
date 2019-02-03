@@ -8,11 +8,15 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class TodoListViewController: SwipeTableViewController {
     
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     var todoItems: Results<Item>?
     let realm = try! Realm()
+    var baseColor = UIColor()
     
     var selectedCategory: Category? {
         
@@ -27,6 +31,22 @@ class TodoListViewController: SwipeTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.separatorStyle = .none
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        title = selectedCategory?.name ?? "Items"
+        navigationController?.navigationBar.barTintColor = baseColor
+        navigationController?.navigationBar.tintColor = ContrastColorOf(baseColor, returnFlat: true)
+        navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(baseColor, returnFlat: true)]
+        searchBar.tintColor = baseColor
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        guard let originalColour = UIColor(hexString: "1D9BF6") else { fatalError() }
+        navigationController?.navigationBar.barTintColor = originalColour
+        navigationController?.navigationBar.tintColor = FlatWhite()
+        navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : FlatWhite()]
     }
     
     //MARK - Tableview Datasource Methods
@@ -37,8 +57,13 @@ class TodoListViewController: SwipeTableViewController {
         guard let item = todoItems?[indexPath.row] else { return cell }
         
         cell.textLabel?.text = item.title
-        cell.accessoryType = item.done ? .checkmark : .none  
+        cell.accessoryType = item.done ? .checkmark : .none
         
+        if let backColor = baseColor.darken(byPercentage:
+            CGFloat(indexPath.row) / CGFloat(todoItems!.count)) {
+                cell.backgroundColor = backColor
+                cell.textLabel?.textColor = ContrastColorOf(backColor, returnFlat: true)
+            }
         return cell
     }
 
@@ -103,7 +128,7 @@ class TodoListViewController: SwipeTableViewController {
     
     func loadItems() {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
-        
+        baseColor = UIColor(hexString: (selectedCategory?.cellColor)!)!
         tableView.reloadData()
     }
     
